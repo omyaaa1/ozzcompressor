@@ -3,6 +3,9 @@ const fileInput = document.getElementById("fileInput");
 const targetKbInput = document.getElementById("targetKb");
 const maxWidthInput = document.getElementById("maxWidth");
 const formatSelect = document.getElementById("format");
+const toleranceInput = document.getElementById("tolerance");
+const qualityFloorInput = document.getElementById("qualityFloor");
+const autoDownloadInput = document.getElementById("autoDownload");
 const compressBtn = document.getElementById("compressBtn");
 const originalMeta = document.getElementById("originalMeta");
 const compressedMeta = document.getElementById("compressedMeta");
@@ -10,13 +13,11 @@ const originalPreview = document.getElementById("originalPreview");
 const compressedPreview = document.getElementById("compressedPreview");
 const downloadLink = document.getElementById("downloadLink");
 const statusLine = document.getElementById("status");
+const formatHint = document.getElementById("formatHint");
 
 let currentFile = null;
 let currentImage = null;
 let currentBlobUrl = null;
-
-const QUALITY_FLOOR = 0.35;
-const QUALITY_CEIL = 0.95;
 
 const kb = (bytes) => (bytes / 1024).toFixed(1);
 
@@ -78,9 +79,50 @@ function blobFromCanvas(canvas, mime, quality) {
   });
 }
 
-async function binarySearchQuality(canvas, mime, targetBytes) {
-  let minQ = QUALITY_FLOOR;
-  let maxQ = QUALITY_CEIL;
+async function supportsMime(mime) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 2;
+  canvas.height = 2;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, 2, 2);
+  const blob = await blobFromCanvas(canvas, mime, 0.8);
+  return blob && blob.type === mime;
+}
+
+async function initFormats() {
+  const options = Array.from(formatSelect.options);
+  const results = await Promise.all(options.map((opt) => supportsMime(opt.value)));
+  const supported = [];
+  options.forEach((opt, idx) => {
+    const ok = results[idx];
+    opt.disabled = !ok;
+    if (!ok) {
+      opt.textContent = `${opt.textContent} (not supported)`;
+    } else {
+      supported.push(opt.textContent);
+    }
+  });
+  if (formatSelect.selectedOptions[0]?.disabled) {
+    const firstSupported = options.find((opt) => !opt.disabled);
+    if (firstSupported) formatSelect.value = firstSupported.value;
+  }
+  formatHint.textContent = `Available formats: ${supported.join(", ")}`;
+}
+
+function getToleranceFactor() {
+  const tolerancePct = Math.max(0, Math.min(10, parseFloat(toleranceInput.value || "2")));
+  return 1 + tolerancePct / 100;
+}
+
+function getQualityFloor() {
+  const floorPct = Math.max(10, Math.min(95, parseFloat(qualityFloorInput.value || "35")));
+  return floorPct / 100;
+}
+
+async function binarySearchQuality(canvas, mime, targetBytes, qualityFloor) {
+  let minQ = qualityFloor;
+  let maxQ = 0.95;
   let best = null;
 
   for (let i = 0; i < 10; i += 1) {
@@ -103,7 +145,7 @@ async function binarySearchQuality(canvas, mime, targetBytes) {
 }
 
 async function compressToTarget(img, targetBytes, options) {
-  const { mime, maxWidth } = options;
+  const { mime, maxWidth, tolerance, qualityFloor } = options;
   let scale = 1;
   if (maxWidth && maxWidth > 0) {
     scale = Math.min(scale, maxWidth / img.naturalWidth);
@@ -119,10 +161,10 @@ async function compressToTarget(img, targetBytes, options) {
 
   for (let attempt = 0; attempt < 7; attempt += 1) {
     statusLine.textContent = `Optimizing... pass ${attempt + 1}`;
-    const blob = await binarySearchQuality(canvas, mime, targetBytes);
+    const blob = await binarySearchQuality(canvas, mime, targetBytes, qualityFloor);
     if (blob) bestBlob = blob;
 
-    if (blob && blob.size <= targetBytes * 1.02) {
+    if (blob && blob.size <= targetBytes * tolerance) {
       return { blob, scale };
     }
 
@@ -147,10 +189,12 @@ async function compressCurrent() {
   const targetBytes = Math.max(10, targetKb) * 1024;
   const maxWidth = parseInt(maxWidthInput.value, 10) || 0;
   const mime = formatSelect.value;
+  const tolerance = getToleranceFactor();
+  const qualityFloor = getQualityFloor();
 
   try {
     const sameFormat = currentFile.type === mime && maxWidth === 0;
-    if (sameFormat && currentFile.size <= targetBytes * 1.02) {
+    if (sameFormat && currentFile.size <= targetBytes * tolerance) {
       const blobUrl = URL.createObjectURL(currentFile);
       if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
       currentBlobUrl = blobUrl;
@@ -159,11 +203,17 @@ async function compressCurrent() {
       downloadLink.href = blobUrl;
       downloadLink.download = currentFile.name;
       downloadLink.classList.add("show");
+      if (autoDownloadInput.checked) downloadLink.click();
       statusLine.textContent = "Done";
       return;
     }
 
-    const { blob } = await compressToTarget(currentImage, targetBytes, { mime, maxWidth });
+    const { blob } = await compressToTarget(currentImage, targetBytes, {
+      mime,
+      maxWidth,
+      tolerance,
+      qualityFloor
+    });
     if (!blob) throw new Error("Compression failed");
 
     const blobUrl = URL.createObjectURL(blob);
@@ -178,10 +228,11 @@ async function compressCurrent() {
     }
     compressedMeta.textContent = `${kb(blob.size)} KB · ${ratio}% of original${extra}`;
 
-    const ext = mime === "image/webp" ? "webp" : mime === "image/png" ? "png" : "jpg";
+    const ext = mime === "image/webp" ? "webp" : mime === "image/png" ? "png" : mime === "image/avif" ? "avif" : "jpg";
     downloadLink.href = blobUrl;
     downloadLink.download = `${currentFile.name.replace(/\.[^/.]+$/, "")}-compressed.${ext}`;
     downloadLink.classList.add("show");
+    if (autoDownloadInput.checked) downloadLink.click();
     statusLine.textContent = "Done";
   } catch (err) {
     compressedMeta.textContent = "Compression failed. Try a larger target size.";
@@ -221,3 +272,5 @@ window.addEventListener("paste", (e) => {
     if (file) loadFile(file);
   }
 });
+
+initFormats();

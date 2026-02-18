@@ -111,6 +111,13 @@ label {
   font-size: 14px;
 }
 
+label.inline {
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding-top: 26px;
+}
+
 input, select {
   background: #11141c;
   border: 1px solid var(--line);
@@ -146,6 +153,11 @@ button:not(:disabled):hover {
   color: var(--muted);
   font-size: 12px;
   text-align: right;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .results {

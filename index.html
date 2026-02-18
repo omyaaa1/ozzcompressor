@@ -41,11 +41,25 @@
             <option value="image/jpeg" selected>JPEG</option>
             <option value="image/webp">WebP</option>
             <option value="image/png">PNG</option>
+            <option value="image/avif">AVIF</option>
           </select>
+        </label>
+        <label>
+          Size tolerance (%)
+          <input id="tolerance" type="number" min="0" max="10" value="2" />
+        </label>
+        <label>
+          Quality floor (%)
+          <input id="qualityFloor" type="number" min="10" max="95" value="35" />
+        </label>
+        <label class="inline">
+          <input id="autoDownload" type="checkbox" checked />
+          Auto-download
         </label>
         <button id="compressBtn" disabled>Compress</button>
       </div>
 
+      <div class="hint" id="formatHint">Checking format support...</div>
       <div id="status" class="status">Ready</div>
     </section>
 
@@ -64,7 +78,7 @@
     </section>
 
     <footer class="footnote">
-      PNG ignores quality controls. Use JPEG/WebP for best size targeting.
+      PNG is lossless and may not reach very small targets. AVIF support depends on your browser.
     </footer>
   </main>
 

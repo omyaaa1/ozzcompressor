@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #0f1115;
   --panel: #171a21;
   --accent: #f5c45a;
@@ -140,6 +140,12 @@ button:disabled {
 button:not(:disabled):hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(245, 196, 90, 0.25);
+}
+
+.status {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
 }
 
 .results {

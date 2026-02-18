@@ -1,8 +1,12 @@
 ﻿# OzzCompressor
 
-Target-size image compression directly in your browser. Drop an image, set a KB target, and download the result. No uploads.
+Target-size image compression directly in your browser. Drop an image, set a KB target, and download the result. No uploads, no server.
 
 Live demo: https://omyaaa1.github.io/ozzcompressor/
+
+## Why
+
+Most compressors give you quality sliders, not outcomes. OzzCompressor targets a size so you can ship assets that meet strict limits.
 
 ## Features
 
@@ -16,14 +20,14 @@ Live demo: https://omyaaa1.github.io/ozzcompressor/
 
 ## Supported formats
 
-The app will enable only what your browser can encode:
+The app enables only what your browser can encode:
 
 - JPEG
 - WebP
 - PNG (lossless)
 - AVIF (modern browsers only)
 
-## How to use
+## Usage
 
 1. Open the app in a browser.
 2. Drop an image (or click to select / paste from clipboard).
@@ -31,15 +35,21 @@ The app will enable only what your browser can encode:
 4. Adjust advanced controls if needed.
 5. Click Compress, then download.
 
-## Format notes
+## Limitations
 
-- JPEG / WebP: best for hitting exact size targets.
-- PNG: lossless, may not reach small targets.
-- AVIF: excellent compression when supported.
+- PNG is lossless and may not reach small targets.
+- AVIF availability depends on browser support.
+- Exact targeting is best-effort and may vary by content.
 
 ## Development
 
-This is a static site. Just open `index.html` or serve the folder with any static server.
+This is a static site. Open `index.html` or serve the folder with any static server.
+
+Commands:
+
+- `npm run test`
+- `npm run lint`
+- `npm run format`
 
 ## License
 

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OzzCompressor</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">OzzCompressor</p>
+        <h1>Target-size image compression</h1>
+        <p class="sub">Drop a file, set the size, download the result.</p>
+      </div>
+      <div class="badge">No uploads. All in-browser.</div>
+    </header>
+
+    <section class="panel">
+      <div id="dropzone" class="dropzone" tabindex="0">
+        <input id="fileInput" type="file" accept="image/*" hidden />
+        <div class="dz-inner">
+          <p class="dz-title">Drop image here</p>
+          <p class="dz-sub">or click to select</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label>
+          Target size (KB)
+          <input id="targetKb" type="number" min="10" max="5000" value="150" />
+        </label>
+        <label>
+          Max width (px)
+          <input id="maxWidth" type="number" min="0" max="8000" placeholder="optional" />
+        </label>
+        <label>
+          Format
+          <select id="format">
+            <option value="image/jpeg" selected>JPEG</option>
+            <option value="image/webp">WebP</option>
+            <option value="image/png">PNG</option>
+          </select>
+        </label>
+        <button id="compressBtn" disabled>Compress</button>
+      </div>
+    </section>
+
+    <section class="results">
+      <div class="card">
+        <h3>Original</h3>
+        <div id="originalMeta" class="meta">No file loaded</div>
+        <img id="originalPreview" alt="Original preview" />
+      </div>
+      <div class="card">
+        <h3>Compressed</h3>
+        <div id="compressedMeta" class="meta">Not processed</div>
+        <img id="compressedPreview" alt="Compressed preview" />
+        <a id="downloadLink" class="download" download="compressed">Download</a>
+      </div>
+    </section>
+
+    <footer class="footnote">
+      PNG ignores quality controls. Use JPEG/WebP for best size targeting.
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

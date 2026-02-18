@@ -43,7 +43,7 @@ The app enables only what your browser can encode:
 
 ## Development
 
-This is a static site. Open `index.html` or serve the folder with any static server.
+The static site lives in `docs/`. Open `docs/index.html` or serve `docs/` with any static server.
 
 Commands:
 

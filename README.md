@@ -2,7 +2,7 @@
 
 Target-size image compression directly in your browser. Drop an image, set a KB target, and download the result. No uploads, no server.
 
-Live demo: https://omyaaa1.github.io/ozzcompressor/
+Live demo: (https://omb-11.github.io/ozzcompressor/)
 
 ## Why
 
